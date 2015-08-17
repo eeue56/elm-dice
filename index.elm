@@ -56,8 +56,12 @@ numberView : (String -> Signal.Message) -> Int -> Html.Html
 numberView action n = 
   input [ value (toString n), type' "number", on "input" targetValue action ]  [ text <| toString n ]
 
-grabNumber : Int -> String -> Int
-grabNumber old newNumber = 
+{-
+  Try to convert a string to a number, given a default value
+  Default to the value if it failed to convert
+-}
+attemptToInt : Int -> String -> Int
+attemptToInt old newNumber = 
   case toInt newNumber of
     Ok x -> x
     Err _ -> old
@@ -65,13 +69,13 @@ grabNumber old newNumber =
 minView address model = 
   form [] 
     [ text "Minimum:"
-    , numberView (Signal.message address << NewMin << (grabNumber model.min)) model.min
+    , numberView (Signal.message address << NewMin << (attemptToInt model.min)) model.min
     ]
 
 maxView address model = 
   form []
     [ text "Maximum:"
-    , numberView (Signal.message address << NewMax << (grabNumber model.max)) model.max
+    , numberView (Signal.message address << NewMax << (attemptToInt model.max)) model.max
     ]
 
 view address model =
