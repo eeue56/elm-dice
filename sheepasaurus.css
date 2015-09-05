@@ -1,0 +1,25 @@
+.die-container {
+	position: absolute;
+	height: 300px;
+	width: 300px;
+}
+
+img.die {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    height: 100%;
+    width: 100%;
+}
+
+.die {
+	font-family: Sans-Serif;
+    color: black;
+    text-align: center;
+    /*font-size: 66px;*/
+	position: absolute;
+	left: 18%;
+	height: 20%;
+	width: 80%;
+	z-index: 5;
+}

@@ -1,6 +1,8 @@
-import Html exposing (div, button, text, input, fromElement, form)
+module Index where 
+
+import Html exposing (div, button, img, h1, text, input, fromElement, form)
 import Html.Events exposing (onClick, on, targetValue)
-import Html.Attributes exposing (type', value)
+import Html.Attributes exposing (type', value, src, class, style)
 
 import Graphics.Element exposing (show)
 import String exposing (toInt)
@@ -18,7 +20,8 @@ type alias Model = {
     number : Int,
     seed : Random.Seed,
     min : Int,
-    max : Int
+    max : Int,
+    history : List Int
 }
 
 {- 
@@ -32,10 +35,11 @@ model : Model
 model = { number = 0,  
   seed = Random.initialSeed 5,
   min = 1,
-  max = 6 }
+  max = 6,
+  history = [] }
 
-
-updateNumber n model = { model | number <- n } 
+updateHistory n model = { model | history <- n :: model.history }
+updateNumber n model = updateHistory n { model | number <- n } 
 updateSeed s model = { model | seed <- s }
 
 {- 
@@ -67,23 +71,45 @@ attemptToInt old newNumber =
     Err _ -> old
 
 minView address model = 
-  form [] 
+  div [] 
     [ text "Minimum:"
     , numberView (Signal.message address << NewMin << (attemptToInt model.min)) model.min
     ]
 
 maxView address model = 
-  form []
+  div []
     [ text "Maximum:"
     , numberView (Signal.message address << NewMax << (attemptToInt model.max)) model.max
     ]
 
+resultView model =
+  let
+    x = toFloat model.number
+    numDigits = floor <| logBase 10 x + 2
+    fontSize = toString <| clamp 8 100 (250//numDigits)
+    top = toString <| clamp 0 48 (30 + numDigits * 3)
+
+  in
+    div [class "die-container"]
+      [ img [src "dice.png" , class "die"] []
+      , div [ class "die", style [ ("font-size", fontSize ++ "px" ) 
+                                 , ("top", top ++ "%")] ]
+            [ text <| toString model.number ]
+      ]
+
+makeCounter model n =
+  div [] [ text <| toString <| List.length <| List.filter (\x-> x == n) model.history ]
+
+historyView model =
+    div [] <| List.map (makeCounter model) [model.min .. model.max]
+
 view address model =
-  form []
+  div []
     [ button [ onClick address NewNumber ] [ text "New random number!" ]
     , minView address model
     , maxView address model
-    , div [] [ text <| "Current number: " ++ (toString model.number) ]
+    , resultView model
+    , historyView model
     ]
 
 type Action = NewNumber | NewMin Int | NewMax Int
